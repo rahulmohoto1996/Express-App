@@ -1,5 +1,8 @@
-/* #version=0.0.0-0#6 rm 2024-10-23T19:16:49 840B6ED50613F7ED */
-/* #version=0.0.0-0#5 rm 2024-10-22T19:21:57 4743C18BCB2FF1E9 */
+/* #version=0.0.0-0#12 rm 2024-11-14T19:41:55 C426AD075C2EF7BA */
+/* #version=0.0.0-0#11 rm 2024-11-14T19:02:02 7D061CE5873E1C90 */
+const googleAuth = require("./googleDriveAuthentication.js");
+const googleUtility = require("./googleDriveUtilityFunctions.js");
+
 var express = require('express')
 var cors = require('cors')
 var app = express()
@@ -22,3 +25,39 @@ app.get('/events/:id', (req, res) => {
     const event = events.find(event => event.id === id);
     res.send(event);
 });
+
+app.get('/readFromSheet/', (req, res) => {
+  debugger;
+  var data = eventServiceHandler.downloadFile_test(); 
+});
+
+app.get('/authorize/', (req, res) => {
+  debugger;
+  var data = googleAuth.authorize();//.then(googleAuth.listFiles).catch(console.error);
+})
+
+app.get('/listFiles/', async (req, res) => {
+  debugger;
+  var auth = await googleAuth.authorize();
+  var list = await googleUtility.listFiles(auth);
+})
+
+app.get('/listFilesUnderFolder/', async (req, res) => {
+  debugger;
+  var folderId = '1ZbV78lR5wQntzf1zgfQ5NlzTsgf2ThSg'; //This is boroghor folder ID
+  var auth = await googleAuth.authorize();
+  var files = await googleUtility.listFilesUnderFolderId(auth, folderId);
+  if (files.length === 0) {
+    console.log('No files found.');
+    return;
+  }
+  console.log('Files:');
+  files.map((file) => {
+    console.log(`${file.name} (${file.id})`);
+  });
+})
+
+app.get('/oauth2callback/', (req, res) => {
+  debugger;
+
+})

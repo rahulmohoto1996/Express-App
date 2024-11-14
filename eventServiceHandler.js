@@ -1,5 +1,8 @@
-/* #version=0.0.0-0#2 rm 2024-10-23T19:17:52 AA461FC1819B3AF1 */
-/* #version=0.0.0-0#1 rm 2024-10-22T19:29:10 50C2C9F5F7ADCA73 */
+/* #version=0.0.0-0#13 rm 2024-11-14T19:02:40 F340A01B9C39A5E2 */
+/* #version=0.0.0-0#12 rm 2024-11-14T19:01:01 51A6E774323F18DD */
+var XLSX = require("xlsx"); //Adding XLSX read from sheetJS library.
+const googleAuth = require("./googleDriveAuthentication.js");
+const googleUtility = require("./googleDriveUtilityFunctions.js");
 module.exports = {
 
     mockData: {
@@ -34,7 +37,7 @@ module.exports = {
                     time: '12:00'
                 }
             ]
-    }
+    },
     
     // getAllEvents: function() {
     //     app.get('/events', (req, res) => {
@@ -49,5 +52,69 @@ module.exports = {
     //         res.send(event);
     //     });
     // }
+
+    //https://stackoverflow.com/questions/76210589/read-excel-file-from-google-shared-drive-in-app-script-without-insert
+    // readFromSheetJS: function() {
+    //     debugger;
+    //     const filename = "1kgChini.xls"; // Please set the filename of XLSX
+    //     const folderId = "1ZbV78lR5wQntzf1zgfQ5NlzTsgf2ThSg"; // Please set the folder ID.
+    //     const sheetName = "Sheet1"; // Please set the sheet name you want to retrieve the values.
+      
+    //     // Retrieve XLSX file using the filename.
+    //     const files = DriveApp.getFolderById(folderId).searchFiles(`title='${filename}' and mimeType='${MimeType.MICROSOFT_EXCEL}' and trashed=false`);
+    //     const file = files.hasNext() && files.next();
+    //     if (!file) throw new Error("No file.");
+    //     const fileId = file.getId();
+      
+    //     // Retrieve values from XLSX data.
+    //     const data = new Uint8Array(DriveApp.getFileById(fileId).getBlob().getBytes());
+    //     const book = XLSX.read(data, { type: "array" });
+    //     const csv = XLSX.utils.sheet_to_csv(book.Sheets[sheetName]);
+    //     const values = Utilities.parseCsv(csv);
+      
+    //     console.log(values);
+    // },
+
+    // readFromSheetJS_test() {
+
+    //     debugger;
+    //     var test = this.readFromSheetJS();
+    //     console.log(test);
+
+    // }
+
+    async downloadFile(realFileId) {
+        debugger;
+        // Get credentials and build service
+        // TODO (developer) - Use appropriate auth mechanism for your app
+      
+        const {GoogleAuth} = require('google-auth-library');
+        const {google} = require('googleapis');
+      
+        // const auth = new GoogleAuth({
+        //   scopes: 'https://www.googleapis.com/auth/drive',
+        // });
+        // const service = google.drive({version: 'v3', auth});
+        var auth = await googleAuth.authorize();
+        var service = google.drive({version: 'v3', auth});
+      
+        fileId = realFileId;
+        try {
+          const file = await service.files.get({
+            fileId: fileId,
+            alt: 'media',
+          });
+          console.log(file.status);
+          return file.status;
+        } catch (err) {
+          // TODO(developer) - Handle error
+          throw err;
+        }
+    },
+
+    async downloadFile_test() {
+        var fileId = '1huuXH6UHB17KytXTQ5B0hFa2c5t1ilBz'; //This is 1kgChini.xls file --> 1huuXH6UHB17KytXTQ5B0hFa2c5t1ilBz
+        var result = await this.downloadFile(fileId);
+    }
     
     }
