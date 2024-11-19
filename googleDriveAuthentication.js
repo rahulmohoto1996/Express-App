@@ -1,5 +1,5 @@
-/* #version=0.0.0-0#21 rm 2024-11-19T18:36:19 C4A0889DBB1DA66E */
-/* #version=0.0.0-0#20 rm 2024-11-19T18:34:40 DCD48FE0F6815A44 */
+/* #version=0.0.0-0#23 rm 2024-11-19T18:52:46 63E5B1E063AAF300 */
+/* #version=0.0.0-0#22 rm 2024-11-19T18:52:08 53DCF17D45CDC8FA */
 //KB: https://developers.google.com/drive/api/quickstart/nodejs
 const fs = require('fs').promises;
 const path = require('path');
@@ -76,6 +76,7 @@ async loadSavedCredentialsIfExist() {
       scopes: SCOPES,
       keyfilePath: VIRTUAL_CREDENTIALS_PATH, //CREDENTIALS_PATH,
     });
+    console.log('Authenticated with Google.');
     if (client.credentials) {
       await this.saveCredentials(client);
       this.deleteFile(VIRTUAL_CREDENTIALS_PATH);
@@ -92,7 +93,7 @@ async loadSavedCredentialsIfExist() {
     var client_id = process.env.client_id;
     keys.web.client_secret = client_secret;
     keys.web.client_id = client_id;
-    console.log(`Keys: ${keys}`);
+    console.log(`${JSON.stringify(keys, null, 4)}`);
     await fs.writeFile(VIRTUAL_CREDENTIALS_PATH, JSON.stringify(keys));
   },
 
