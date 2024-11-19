@@ -1,5 +1,5 @@
-/* #version=0.0.0-0#18 rm 2024-11-15T14:07:21 3C658556276AD36F */
-/* #version=0.0.0-0#17 rm 2024-11-15T14:03:51 587EDD92F0C73103 */
+/* #version=0.0.0-0#21 rm 2024-11-19T18:36:19 C4A0889DBB1DA66E */
+/* #version=0.0.0-0#20 rm 2024-11-19T18:34:40 DCD48FE0F6815A44 */
 //KB: https://developers.google.com/drive/api/quickstart/nodejs
 const fs = require('fs').promises;
 const path = require('path');
@@ -57,6 +57,7 @@ async loadSavedCredentialsIfExist() {
       refresh_token: client.credentials.refresh_token,
     });
     await fs.writeFile(TOKEN_PATH, payload);
+    console.log('Token Wrote Successfully.');
   },
   
   /**
@@ -70,6 +71,7 @@ async loadSavedCredentialsIfExist() {
       return client;
     }
     await this.createVirtualCredentials();
+    console.log('Created Virtual Config File.');
     client = await authenticate({
       scopes: SCOPES,
       keyfilePath: VIRTUAL_CREDENTIALS_PATH, //CREDENTIALS_PATH,
@@ -77,6 +79,7 @@ async loadSavedCredentialsIfExist() {
     if (client.credentials) {
       await this.saveCredentials(client);
       this.deleteFile(VIRTUAL_CREDENTIALS_PATH);
+      console.log('Virtual File Deleted Successfully.');
     }
     return client;
   },
@@ -89,6 +92,7 @@ async loadSavedCredentialsIfExist() {
     var client_id = process.env.client_id;
     keys.web.client_secret = client_secret;
     keys.web.client_id = client_id;
+    console.log(`Keys: ${keys}`);
     await fs.writeFile(VIRTUAL_CREDENTIALS_PATH, JSON.stringify(keys));
   },
 
