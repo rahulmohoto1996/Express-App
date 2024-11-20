@@ -1,5 +1,5 @@
+/* #version=0.0.0-0#24 rm 2024-11-20T12:33:10 ED766FEE8555617E */
 /* #version=0.0.0-0#23 rm 2024-11-19T18:52:46 63E5B1E063AAF300 */
-/* #version=0.0.0-0#22 rm 2024-11-19T18:52:08 53DCF17D45CDC8FA */
 //KB: https://developers.google.com/drive/api/quickstart/nodejs
 const fs = require('fs').promises;
 const path = require('path');
@@ -72,10 +72,14 @@ async loadSavedCredentialsIfExist() {
     }
     await this.createVirtualCredentials();
     console.log('Created Virtual Config File.');
-    client = await authenticate({
-      scopes: SCOPES,
-      keyfilePath: VIRTUAL_CREDENTIALS_PATH, //CREDENTIALS_PATH,
-    });
+    try {
+      client = await authenticate({
+        scopes: SCOPES,
+        keyfilePath: VIRTUAL_CREDENTIALS_PATH, //CREDENTIALS_PATH,
+      });
+    } catch (error) {
+      console.log(error);
+    }
     console.log('Authenticated with Google.');
     if (client.credentials) {
       await this.saveCredentials(client);
