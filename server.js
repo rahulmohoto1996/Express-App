@@ -1,5 +1,5 @@
+/* #version=0.0.0-0#13 rm 2024-11-22T17:38:22 26DB39F127DAF49B */
 /* #version=0.0.0-0#12 rm 2024-11-14T19:41:55 C426AD075C2EF7BA */
-/* #version=0.0.0-0#11 rm 2024-11-14T19:02:02 7D061CE5873E1C90 */
 const googleAuth = require("./googleDriveAuthentication.js");
 const googleUtility = require("./googleDriveUtilityFunctions.js");
 
@@ -7,7 +7,11 @@ var express = require('express')
 var cors = require('cors')
 var app = express()
  
-app.use(cors())
+// app.use(cors())
+app.use(cors({
+  origin: ['http://localhost:5000', 'https://express-app-r2vg.onrender.com'],
+  methods: 'GET,POST',
+}));
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
@@ -59,5 +63,5 @@ app.get('/listFilesUnderFolder/', async (req, res) => {
 
 app.get('/oauth2callback/', (req, res) => {
   debugger;
-
+  res.send('Authentication Successful.');
 })
