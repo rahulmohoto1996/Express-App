@@ -1,5 +1,5 @@
+/* #version=0.0.0-0#25 rm 2024-11-22T20:28:44 DD628911F0A6772D */
 /* #version=0.0.0-0#24 rm 2024-11-22T20:24:42 A0D2E39F3A8D46E3 */
-/* #version=0.0.0-0#23 rm 2024-11-22T19:16:20 6D99C0AD7005CFB4 */
 const googleAuth = require("./googleDriveAuthentication.js");
 const googleUtility = require("./googleDriveUtilityFunctions.js");
 
@@ -9,11 +9,11 @@ var app = express()
 
 var oauth2Client = null;
  
-// app.use(cors())
-app.use(cors({
-  origin: ['http://localhost:8080', 'http://localhost:5000', 'https://express-app-r2vg.onrender.com'],
-  methods: 'GET,POST',
-}));
+app.use(cors())
+// app.use(cors({
+//   origin: ['http://localhost:8080', 'http://localhost:5000', 'https://express-app-r2vg.onrender.com'],
+//   methods: 'GET,POST',
+// }));
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
