@@ -1,5 +1,5 @@
-/* #version=0.0.0-0#32 rm 2024-11-22T18:53:17 3CAB3D85A270DCB1 */
-/* #version=0.0.0-0#31 rm 2024-11-22T18:39:32 B23EC667BD518D46 */
+/* #version=0.0.0-0#28 rm 2024-11-22T16:06:37 9F78430673766ABE */
+/* #version=0.0.0-0#27 rm 2024-11-22T16:03:15 94DDC84D88DFA330 */
 //KB: https://developers.google.com/drive/api/quickstart/nodejs
 const fs = require('fs').promises;
 const path = require('path');
@@ -70,41 +70,23 @@ async loadSavedCredentialsIfExist() {
     if (client) {
       return client;
     }
-    // await this.createVirtualCredentials();
-    // console.log('Created Virtual Config File.');
-
-    var content = await fs.readFile(CREDENTIALS_PATH);
-    var keys = JSON.parse(content);
-    var redirect_uris = keys.web.redirect_uris;
-    var REDIRECT_URI = process.env.NODE_ENV === 'production' ? redirect_uris.find((n) => n.env == "prod") : redirect_uris.find((n) => n.env == "dev");
-    REDIRECT_URI = REDIRECT_URI.uri;
-
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.CLIENT_ID, // Your Google OAuth Client ID
-      process.env.CLIENT_SECRET, // Your Google OAuth Client Secret
-      REDIRECT_URI // Redirect URI for server
-    );
-    const authUrl = oauth2Client.generateAuthUrl({
-      access_type: 'offline',
-      scope: SCOPES, // Add necessary scopes
-    });
-
-    return {authUrl: authUrl, oauth2Client: oauth2Client};
-    // try {
-    //   client = await authenticate({
-    //     scopes: SCOPES,
-    //     keyfilePath: VIRTUAL_CREDENTIALS_PATH, //CREDENTIALS_PATH,
-    //   });
-    // } catch (error) {
-    //   console.log(error);
-    // }
-    // console.log('Authenticated with Google.');
-    // if (client.credentials) {
-    //   await this.saveCredentials(client);
-    //   this.deleteFile(VIRTUAL_CREDENTIALS_PATH);
-    //   console.log('Virtual File Deleted Successfully.');
-    // }
-    // return client;
+    await this.createVirtualCredentials();
+    console.log('Created Virtual Config File.');
+    try {
+      client = await authenticate({
+        scopes: SCOPES,
+        keyfilePath: VIRTUAL_CREDENTIALS_PATH, //CREDENTIALS_PATH,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+    console.log('Authenticated with Google.');
+    if (client.credentials) {
+      await this.saveCredentials(client);
+      this.deleteFile(VIRTUAL_CREDENTIALS_PATH);
+      console.log('Virtual File Deleted Successfully.');
+    }
+    return client;
   },
 
   //Creating a virtual credential file

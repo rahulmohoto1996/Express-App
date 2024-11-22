@@ -1,11 +1,13 @@
-/* #version=0.0.0-0#13 rm 2024-11-22T17:38:22 26DB39F127DAF49B */
-/* #version=0.0.0-0#12 rm 2024-11-14T19:41:55 C426AD075C2EF7BA */
+/* #version=0.0.0-0#23 rm 2024-11-22T19:16:20 6D99C0AD7005CFB4 */
+/* #version=0.0.0-0#22 rm 2024-11-22T18:56:46 6596F3F2946E87B0 */
 const googleAuth = require("./googleDriveAuthentication.js");
 const googleUtility = require("./googleDriveUtilityFunctions.js");
 
 var express = require('express')
 var cors = require('cors')
 var app = express()
+
+var oauth2Client = null;
  
 // app.use(cors())
 app.use(cors({
@@ -35,11 +37,6 @@ app.get('/readFromSheet/', (req, res) => {
   var data = eventServiceHandler.downloadFile_test(); 
 });
 
-app.get('/authorize/', (req, res) => {
-  debugger;
-  var data = googleAuth.authorize();//.then(googleAuth.listFiles).catch(console.error);
-})
-
 app.get('/listFiles/', async (req, res) => {
   debugger;
   var auth = await googleAuth.authorize();
@@ -61,7 +58,37 @@ app.get('/listFilesUnderFolder/', async (req, res) => {
   });
 })
 
-app.get('/oauth2callback/', (req, res) => {
+// app.get('/oauth2callback/', (req, res) => {
+//   debugger;
+//   res.send('Authentication Successful.');
+// })
+
+app.get('/authorize', async (req, res) => {
   debugger;
-  res.send('Authentication Successful.');
+  var result = await googleAuth.authorize();//.then(googleAuth.listFiles).catch(console.error);
+  var authUrl = result.authUrl;
+  oauth2Client = result.oauth2Client;
+  res.redirect(authUrl); //https://www.geeksforgeeks.org/express-js-res-redirect-function/
+})
+
+
+app.get('/oauth2callback', async (req, res) => {
+  debugger;
+  const code = req.query.code;
+
+  if (!code) {
+    return res.status(400).send('No authorization code found.');
+  }
+
+  try {
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+
+    // You can now use the tokens to make API requests on behalf of the user
+    console.log('Tokens acquired:', tokens);
+    res.send('Authentication successful!');
+  } catch (error) {
+    console.error('Error retrieving tokens:', error);
+    res.status(500).send('Authentication failed.');
+  }
 })
