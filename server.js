@@ -1,7 +1,9 @@
-/* #version=0.0.0-0#25 rm 2024-11-22T20:28:44 DD628911F0A6772D */
-/* #version=0.0.0-0#24 rm 2024-11-22T20:24:42 A0D2E39F3A8D46E3 */
-const googleAuth = require("./googleDriveAuthentication.js");
-const googleUtility = require("./googleDriveUtilityFunctions.js");
+/* #version=0.0.0-0#34 rm 2024-11-26T18:44:20 7E664059692CDE1 */
+/* #version=0.0.0-0#33 rm 2024-11-26T18:41:07 A969754BA11CBB5 */
+const googleAuth = require("./public/js/googleDriveAuthentication.js");
+const googleUtility = require("./public/js/googleDriveUtilityFunctions.js");
+
+import xhrCore from "./public/js/xhrCore.js";
 
 var express = require('express')
 var cors = require('cors')
@@ -19,7 +21,7 @@ const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
-const eventServiceHandler = require("./eventServiceHandler.js");
+const eventServiceHandler = require("./public/js/eventServiceHandler.js");
 var events = eventServiceHandler.mockData.events;
 
 app.get('/events', (req, res) => {
@@ -66,9 +68,11 @@ app.get('/listFilesUnderFolder/', async (req, res) => {
 app.get('/authorize', async (req, res) => {
   debugger;
   var result = await googleAuth.authorize();//.then(googleAuth.listFiles).catch(console.error);
+  console.log(result);
   var authUrl = result.authUrl;
   oauth2Client = result.oauth2Client;
-  res.redirect(authUrl); //https://www.geeksforgeeks.org/express-js-res-redirect-function/
+  res.header('Access-Control-Allow-Origin', '*');
+  // res.redirect(authUrl); //https://www.geeksforgeeks.org/express-js-res-redirect-function/
 })
 
 
