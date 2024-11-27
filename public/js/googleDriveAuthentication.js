@@ -1,6 +1,8 @@
-/* #version=0.0.0-0#32 rm 2024-11-22T18:53:17 3CAB3D85A270DCB1 */
-/* #version=0.0.0-0#31 rm 2024-11-22T18:39:32 B23EC667BD518D46 */
+/* #version=0.0.0-0#35 rm 2024-11-27T13:56:58 DE92085BB907E778 */
+/* #version=0.0.0-0#34 rm 2024-11-27T13:54:25 D32A106826A343E1 */
 //KB: https://developers.google.com/drive/api/quickstart/nodejs
+//KB: https://developers.google.com/identity/protocols/oauth2/web-server
+const crypto = require('crypto');
 const fs = require('fs').promises;
 const path = require('path');
 const process = require('process');
@@ -84,12 +86,17 @@ async loadSavedCredentialsIfExist() {
       process.env.CLIENT_SECRET, // Your Google OAuth Client Secret
       REDIRECT_URI // Redirect URI for server
     );
+
+    const state = crypto.randomBytes(32).toString('hex');
+
     const authUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: SCOPES, // Add necessary scopes
+      include_granted_scopes: true,
+      state: state
     });
 
-    return {authUrl: authUrl, oauth2Client: oauth2Client};
+    return {authUrl: authUrl, oauth2Client: oauth2Client, state: state};
     // try {
     //   client = await authenticate({
     //     scopes: SCOPES,
