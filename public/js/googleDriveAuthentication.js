@@ -1,5 +1,5 @@
-/* #version=0.0.0-0#35 rm 2024-11-27T13:56:58 DE92085BB907E778 */
-/* #version=0.0.0-0#34 rm 2024-11-27T13:54:25 D32A106826A343E1 */
+/* #version=0.0.0-0#42 rm 2024-11-28T19:11:08 8EEF1E871570AB4C */
+/* #version=0.0.0-0#41 rm 2024-11-28T13:33:46 DED2AE978ECC47A1 */
 //KB: https://developers.google.com/drive/api/quickstart/nodejs
 //KB: https://developers.google.com/identity/protocols/oauth2/web-server
 const crypto = require('crypto');
@@ -22,7 +22,7 @@ const SCOPES = [
 // time.
 const TOKEN_PATH = path.join(process.cwd(), 'token.json');
 const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
-const VIRTUAL_CREDENTIALS_PATH = path.join(process.cwd(), 'virtualCredentials.json');
+// const VIRTUAL_CREDENTIALS_PATH = path.join(process.cwd(), 'virtualCredentials.json');
 
 module.exports = {
 
@@ -48,18 +48,22 @@ async loadSavedCredentialsIfExist() {
    * @param {OAuth2Client} client
    * @return {Promise<void>}
    */
-  async saveCredentials(client) {
-    const content = await fs.readFile(VIRTUAL_CREDENTIALS_PATH); //await fs.readFile(CREDENTIALS_PATH);
-    const keys = JSON.parse(content);
-    const key = keys.installed || keys.web;
+  async saveCredentials(tokens) {
+    debugger;
+    if(!tokens) return {
+      ok: false,
+      status: 'Tokens not available.'
+    }
     const payload = JSON.stringify({
       type: 'authorized_user',
-      client_id: key.client_id,
-      client_secret: key.client_secret,
-      refresh_token: client.credentials.refresh_token,
+      client_id: process.env.CLIENT_ID,
+      client_secret: process.env.CLIENT_SECRET,
+      refresh_token: tokens.refresh_token,
+      access_token: tokens.access_token
     });
     await fs.writeFile(TOKEN_PATH, payload);
     console.log('Token Wrote Successfully.');
+    return {ok: true, status: 'Ok'}
   },
   
   /**
@@ -72,9 +76,7 @@ async loadSavedCredentialsIfExist() {
     if (client) {
       return client;
     }
-    // await this.createVirtualCredentials();
-    // console.log('Created Virtual Config File.');
-
+    
     var content = await fs.readFile(CREDENTIALS_PATH);
     var keys = JSON.parse(content);
     var redirect_uris = keys.web.redirect_uris;
@@ -97,44 +99,31 @@ async loadSavedCredentialsIfExist() {
     });
 
     return {authUrl: authUrl, oauth2Client: oauth2Client, state: state};
-    // try {
-    //   client = await authenticate({
-    //     scopes: SCOPES,
-    //     keyfilePath: VIRTUAL_CREDENTIALS_PATH, //CREDENTIALS_PATH,
-    //   });
-    // } catch (error) {
-    //   console.log(error);
-    // }
-    // console.log('Authenticated with Google.');
-    // if (client.credentials) {
-    //   await this.saveCredentials(client);
-    //   this.deleteFile(VIRTUAL_CREDENTIALS_PATH);
-    //   console.log('Virtual File Deleted Successfully.');
-    // }
-    // return client;
   },
 
-  //Creating a virtual credential file
-  async createVirtualCredentials() {
-    var content = await fs.readFile(CREDENTIALS_PATH);
-    var keys = JSON.parse(content);
-    var client_secret = process.env.client_secret;
-    var client_id = process.env.client_id;
-    keys.web.client_secret = client_secret;
-    keys.web.client_id = client_id;
-    var redirect_uris = keys.web.redirect_uris;
-    var REDIRECT_URI = process.env.NODE_ENV === 'production' ? redirect_uris.find((n) => n.env == "prod") : redirect_uris.find((n) => n.env == "dev");
-    keys.web.redirect_uris = [REDIRECT_URI.uri];
-    console.log(`${JSON.stringify(keys, null, 4)}`);
-    await fs.writeFile(VIRTUAL_CREDENTIALS_PATH, JSON.stringify(keys));
-  },
+  //Creating a virtual credential file. 
+  //Not used anymore.
+  // async createVirtualCredentials() {
+  //   var content = await fs.readFile(CREDENTIALS_PATH);
+  //   var keys = JSON.parse(content);
+  //   var client_secret = process.env.client_secret;
+  //   var client_id = process.env.client_id;
+  //   keys.web.client_secret = client_secret;
+  //   keys.web.client_id = client_id;
+  //   var redirect_uris = keys.web.redirect_uris;
+  //   var REDIRECT_URI = process.env.NODE_ENV === 'production' ? redirect_uris.find((n) => n.env == "prod") : redirect_uris.find((n) => n.env == "dev");
+  //   keys.web.redirect_uris = [REDIRECT_URI.uri];
+  //   console.log(`${JSON.stringify(keys, null, 4)}`);
+  //   await fs.writeFile(VIRTUAL_CREDENTIALS_PATH, JSON.stringify(keys));
+  // },
 
   //deleting a file
-  deleteFile(path) {
-    fs.unlink(path, (err) => {
-      if (err) 
-        throw err;
-    });
-    return {ok: true}
-  }
+  //Not used
+  // deleteFile(path) {
+  //   fs.unlink(path, (err) => {
+  //     if (err) 
+  //       throw err;
+  //   });
+  //   return {ok: true}
+  // }
 }

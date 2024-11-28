@@ -1,5 +1,5 @@
-/* #version=0.0.0-0#55 rm 2024-11-27T15:31:59 9146EB815E278A0 */
-/* #version=0.0.0-0#54 rm 2024-11-27T14:00:23 A68460046EAED3A */
+/* #version=0.0.0-0#70 rm 2024-11-28T19:18:37 D2345D4F47F7F180 */
+/* #version=0.0.0-0#69 rm 2024-11-28T19:13:53 F8157FD306D2DA0B */
 const googleAuth = require("./public/js/googleDriveAuthentication.js");
 const googleUtility = require("./public/js/googleDriveUtilityFunctions.js");
 const xhrCore = require("./public/js/xhrCore.js"); // import xhrCore from "./public/js/xhrCore.js";
@@ -26,7 +26,7 @@ app.use(session({
 //   methods: 'GET,POST',
 // }));
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT;
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
@@ -54,19 +54,40 @@ app.get('/listFiles/', async (req, res) => {
   var list = await googleUtility.listFiles(auth);
 })
 
-app.get('/listFilesUnderFolder/', async (req, res) => {
+app.get('/listFilesUnderFolder/:folderId/pageSize/:pageSize', async (req, res) => {
   debugger;
-  var folderId = '1ZbV78lR5wQntzf1zgfQ5NlzTsgf2ThSg'; //This is boroghor folder ID
-  var auth = await googleAuth.authorize();
-  var files = await googleUtility.listFilesUnderFolderId(auth, folderId);
-  if (files.length === 0) {
-    console.log('No files found.');
+  var result = {ok: true};
+  var folderId = req.params.folderId; //'1ZbV78lR5wQntzf1zgfQ5NlzTsgf2ThSg'; //This is boroghor folder ID
+  var pageSize = req.params.pageSize;
+  var auth = await googleAuth.loadSavedCredentialsIfExist(); //await googleAuth.authorize();
+  if (!auth) {
+    result.ok = false;
+    result.status = 'Authorization required.';
+    res.send(result);
     return;
   }
-  console.log('Files:');
-  files.map((file) => {
-    console.log(`${file.name} (${file.id})`);
-  });
+  var response = await googleUtility.listFilesUnderFolderId(auth, folderId, pageSize);
+  if(!response || !response.ok){
+    result.ok = false;
+    result.status = response.status;
+    res.send(result);
+    return;
+  }
+  var files = response.files;
+  if (files.length === 0) {
+    // console.log('No files found.');
+    result.status = 'No files found.';
+    res.send(result);
+    return;
+  }
+  result.status = 'Ok';
+  result.files = files;
+  res.send(result);
+  // return result;
+  // console.log('Files:');
+  // files.map((file) => {
+  //   console.log(`${file.name} (${file.id})`);
+  // });
 })
 
 // app.get('/oauth2callback/', (req, res) => {
@@ -105,6 +126,14 @@ app.get('/oauth2callback', async (req, res) => {
 
     // You can now use the tokens to make API requests on behalf of the user
     console.log('Tokens acquired:', tokens);
+
+    // Saving tokens
+    var response = await googleAuth.saveCredentials(tokens);
+    if(!response.ok) {
+      console.log(response.status);
+      return;
+    }
+
     res.send('Authentication successful!');
   } catch (error) {
     console.error('Error retrieving tokens:', error);
