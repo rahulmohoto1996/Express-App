@@ -1,5 +1,5 @@
-/* #version=0.0.0-0#77 rm 2024-11-29T15:05:14 98B5824589241A92 */
-/* #version=0.0.0-0#76 rm 2024-11-29T15:02:24 FFFF2C607D4E38E5 */
+/* #version=0.0.0-0#83 rm 2024-11-29T19:35:45 D27B3DC600AE3AA4 */
+/* #version=0.0.0-0#82 rm 2024-11-29T19:35:32 907CFDBBE6944FA9 */
 const googleAuth = require("./public/js/googleDriveAuthentication.js");
 const googleUtility = require("./public/js/googleDriveUtilityFunctions.js");
 const xhrCore = require("./public/js/xhrCore.js"); // import xhrCore from "./public/js/xhrCore.js";
@@ -42,17 +42,6 @@ app.get('/events/:id', (req, res) => {
     const event = events.find(event => event.id === id);
     res.send(event);
 });
-
-// app.get('/readFromSheet/', (req, res) => {
-//   debugger;
-//   var data = eventServiceHandler.downloadFile_test(); 
-// });
-
-// app.get('/listFiles/', async (req, res) => {
-//   debugger;
-//   var auth = await googleAuth.authorize();
-//   var list = await googleUtility.listFiles(auth);
-// })
 
 app.get('/listFilesUnderFolder/:folderId/pageSize/:pageSize', async (req, res) => {
   debugger;
@@ -114,6 +103,35 @@ app.get('/readFromFileById/:fileId', async (req, res) => {
   res.send(result);
 })
 
+app.get('/searchFolderFromDrive/:folderName', async (req, res) => {
+  debugger;
+  var result = {ok: true};
+  var folderName = req.params.folderName;
+  if(!folderName) {
+    result.ok = false;
+    result.status = 'Foldername not specified.';
+    res.send(result);
+    return;
+  }
+  var auth = await googleAuth.loadSavedCredentialsIfExist(); //await googleAuth.authorize();
+  if (!auth) {
+    result.ok = false;
+    result.status = 'Authorization required.';
+    res.send(result);
+    return;
+  }
+  var response = await googleUtility.searchFolderByName(auth, folderName);
+  if(!response || !response.ok){
+    result.ok = false;
+    result.status = response.status;
+    res.send(result);
+    return;
+  }
+  result.status = 'Ok';
+  result.folders = response.folders;
+  res.send(result);
+})
+
 app.get('/authorize', async (req, res) => {
   debugger;
   var result = await googleAuth.authorize();//.then(googleAuth.listFiles).catch(console.error);
@@ -153,23 +171,4 @@ app.get('/oauth2callback', async (req, res) => {
     console.error('Error retrieving tokens:', error);
     res.status(500).send('Authentication failed.');
   }
-})
-
-app.get('/xhrGetTest', (req, res) => {
-  debugger;
-  var $xhrCore = new xhrCore();
-  $xhrCore.getFromUrl_test();
-})
-
-app.get('/readxlsfiletest', async (req, res) => {
-  debugger;
-  var auth = await googleAuth.loadSavedCredentialsIfExist(); //await googleAuth.authorize();
-  if (!auth) {
-    result.ok = false;
-    result.status = 'Authorization required.';
-    res.send(result);
-    return;
-  }
-  var response = await googleUtility.readExcelFromDrive_test(auth);
-  debugger;
 })
