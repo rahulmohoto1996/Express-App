@@ -1,5 +1,5 @@
+/* #version=0.0.0-0#86 rm 2024-12-03T19:31:35 8A68CA6CBFBDA041 */
 /* #version=0.0.0-0#85 rm 2024-12-03T15:12:22 329402A355CDFC6 */
-/* #version=0.0.0-0#84 rm 2024-12-03T14:56:11 DACB2198790460B8 */
 const googleAuth = require("./public/js/googleDriveAuthentication.js");
 const googleUtility = require("./public/js/googleDriveUtilityFunctions.js");
 const xhrCore = require("./public/js/xhrCore.js"); // import xhrCore from "./public/js/xhrCore.js";
@@ -148,8 +148,8 @@ app.get('/authorize', async (req, res) => {
   oauth2Client = result.oauth2Client;
   var state = result.state;
   req.session.state = state;
-  result.ok = true;
-  result.status = result.status;
+  // result.ok = true;
+  // result.status = result.status;
   res.send(result); // res.redirect(authUrl); //https://www.geeksforgeeks.org/express-js-res-redirect-function/
 })
 
