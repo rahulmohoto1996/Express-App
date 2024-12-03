@@ -1,5 +1,5 @@
-/* #version=0.0.0-0#83 rm 2024-11-29T19:35:45 D27B3DC600AE3AA4 */
-/* #version=0.0.0-0#82 rm 2024-11-29T19:35:32 907CFDBBE6944FA9 */
+/* #version=0.0.0-0#85 rm 2024-12-03T15:12:22 329402A355CDFC6 */
+/* #version=0.0.0-0#84 rm 2024-12-03T14:56:11 DACB2198790460B8 */
 const googleAuth = require("./public/js/googleDriveAuthentication.js");
 const googleUtility = require("./public/js/googleDriveUtilityFunctions.js");
 const xhrCore = require("./public/js/xhrCore.js"); // import xhrCore from "./public/js/xhrCore.js";
@@ -135,12 +135,22 @@ app.get('/searchFolderFromDrive/:folderName', async (req, res) => {
 app.get('/authorize', async (req, res) => {
   debugger;
   var result = await googleAuth.authorize();//.then(googleAuth.listFiles).catch(console.error);
+  if(!result.ok || !result) {
+    res.send(result);
+    return;
+  }
+  if(result.status == 'Client is authorized already.') {
+    res.send(result);
+    return;
+  }
   // console.log(result);
-  var authUrl = result.authUrl;
+  // var authUrl = result.authUrl;
   oauth2Client = result.oauth2Client;
   var state = result.state;
   req.session.state = state;
-  res.send(authUrl); // res.redirect(authUrl); //https://www.geeksforgeeks.org/express-js-res-redirect-function/
+  result.ok = true;
+  result.status = result.status;
+  res.send(result); // res.redirect(authUrl); //https://www.geeksforgeeks.org/express-js-res-redirect-function/
 })
 
 

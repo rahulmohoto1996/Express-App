@@ -1,5 +1,5 @@
-/* #version=0.0.0-0#42 rm 2024-11-28T19:11:08 8EEF1E871570AB4C */
-/* #version=0.0.0-0#41 rm 2024-11-28T13:33:46 DED2AE978ECC47A1 */
+/* #version=0.0.0-0#44 rm 2024-12-03T14:45:11 8543EF57891F8418 */
+/* #version=0.0.0-0#43 rm 2024-12-03T14:40:11 BF6C3794788D4F5C */
 //KB: https://developers.google.com/drive/api/quickstart/nodejs
 //KB: https://developers.google.com/identity/protocols/oauth2/web-server
 const crypto = require('crypto');
@@ -74,7 +74,7 @@ async loadSavedCredentialsIfExist() {
     debugger;
     let client = await this.loadSavedCredentialsIfExist();
     if (client) {
-      return client;
+      return {client: client, ok: true, status: 'Client is authorized already.'};
     }
     
     var content = await fs.readFile(CREDENTIALS_PATH);
@@ -83,22 +83,27 @@ async loadSavedCredentialsIfExist() {
     var REDIRECT_URI = process.env.NODE_ENV === 'production' ? redirect_uris.find((n) => n.env == "prod") : redirect_uris.find((n) => n.env == "dev");
     REDIRECT_URI = REDIRECT_URI.uri;
 
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.CLIENT_ID, // Your Google OAuth Client ID
-      process.env.CLIENT_SECRET, // Your Google OAuth Client Secret
-      REDIRECT_URI // Redirect URI for server
-    );
+    try {
+      const oauth2Client = new google.auth.OAuth2(
+        process.env.CLIENT_ID, // Your Google OAuth Client ID
+        process.env.CLIENT_SECRET, // Your Google OAuth Client Secret
+        REDIRECT_URI // Redirect URI for server
+      );
+  
+      const state = crypto.randomBytes(32).toString('hex');
+  
+      const authUrl = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: SCOPES, // Add necessary scopes
+        include_granted_scopes: true,
+        state: state
+      }); 
 
-    const state = crypto.randomBytes(32).toString('hex');
+      return {authUrl: authUrl, oauth2Client: oauth2Client, state: state, ok: true, status: 'Authorization URL generated.'};
 
-    const authUrl = oauth2Client.generateAuthUrl({
-      access_type: 'offline',
-      scope: SCOPES, // Add necessary scopes
-      include_granted_scopes: true,
-      state: state
-    });
-
-    return {authUrl: authUrl, oauth2Client: oauth2Client, state: state};
+    } catch (error) {
+      return {ok: false, status: `Authorization Failed. Error: ${error}`}
+    }
   },
 
   //Creating a virtual credential file. 
