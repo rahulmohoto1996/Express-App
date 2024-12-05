@@ -1,5 +1,5 @@
-/* #version=0.0.0-0#86 rm 2024-12-03T19:31:35 8A68CA6CBFBDA041 */
-/* #version=0.0.0-0#85 rm 2024-12-03T15:12:22 329402A355CDFC6 */
+/* #version=0.0.0-0#106 rm 2024-12-05T20:31:30 597C80EE6888E041 */
+/* #version=0.0.0-0#105 rm 2024-12-05T20:28:38 7304F0BAE7D0E9D */
 const googleAuth = require("./public/js/googleDriveAuthentication.js");
 const googleUtility = require("./public/js/googleDriveUtilityFunctions.js");
 const xhrCore = require("./public/js/xhrCore.js"); // import xhrCore from "./public/js/xhrCore.js";
@@ -7,6 +7,9 @@ const xhrCore = require("./public/js/xhrCore.js"); // import xhrCore from "./pub
 const process = require('process');
 const dotenv = require('dotenv');
 dotenv.config();
+
+var FireBase = require('./public/js/fireBase.js');
+var fireBaseApp = new FireBase();
 
 var express = require('express')
 var session = require('express-session');
@@ -170,15 +173,25 @@ app.get('/oauth2callback', async (req, res) => {
     console.log('Tokens acquired:', tokens);
 
     // Saving tokens
-    var response = await googleAuth.saveCredentials(tokens);
+    // var response = await googleAuth.saveCredentials(tokens); //Saving to local
+    var payload = {
+      node: 'credential', 
+      child: 'test', 
+      data: tokens
+    };
+    var response = await fireBaseApp.postData(payload)
     if(!response.ok) {
       console.log(response.status);
       return;
     }
 
-    res.send('Authentication successful!');
+    //Returning the status to client
+    var result = {ok: true, status: 'Authentication successful!'};
+
+    res.send(result);
   } catch (error) {
     console.error('Error retrieving tokens:', error);
-    res.status(500).send('Authentication failed.');
+    var result = {ok: false, status: 'Authentication failed.'};
+    res.status(500).send(result);
   }
 })

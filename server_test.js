@@ -44,3 +44,27 @@ app.get('/xhrGetTest', (req, res) => {
     debugger;
   
   })
+
+  app.get('/testSavingFirebase', async (req, res) => {
+    debugger;
+    var payload = {
+      node: 'data', 
+      child: '1', 
+      data: 'Hello World'
+    };
+    // var message = 'Hello world';
+    var result = await fireBaseApp.postData(payload);
+    var status = result;
+    res.status(200).send(status);
+  });
+  
+  app.get('/testReadingFirebase', async (req, res) => {
+    debugger;
+    var payload = {
+      node: 'data',
+      child: '1'
+    }
+    var result = await fireBaseApp.getData(payload);
+    res.status(200).send(result);
+    debugger;
+  })

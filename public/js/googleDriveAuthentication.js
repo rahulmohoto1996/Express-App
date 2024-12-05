@@ -1,7 +1,10 @@
-/* #version=0.0.0-0#44 rm 2024-12-03T14:45:11 8543EF57891F8418 */
-/* #version=0.0.0-0#43 rm 2024-12-03T14:40:11 BF6C3794788D4F5C */
+/* #version=0.0.0-0#48 rm 2024-12-05T20:25:02 A240DEB9765EDEC0 */
+/* #version=0.0.0-0#47 rm 2024-12-05T20:21:50 209FD6B28338C901 */
 //KB: https://developers.google.com/drive/api/quickstart/nodejs
 //KB: https://developers.google.com/identity/protocols/oauth2/web-server
+var FireBase = require('./fireBase.js');
+var fireBaseApp = new FireBase();
+
 const crypto = require('crypto');
 const fs = require('fs').promises;
 const path = require('path');
@@ -34,8 +37,15 @@ module.exports = {
 async loadSavedCredentialsIfExist() {
     debugger;
     try {
-      const content = await fs.readFile(TOKEN_PATH);
-      const credentials = JSON.parse(content);
+      // const content = await fs.readFile(TOKEN_PATH);
+      var payload = {
+        node: 'credential',
+        child: 'test'
+      }
+      var content = await fireBaseApp.getData(payload);
+      content = content.data;
+      // const credentials = JSON.parse(content);
+      var credentials = content.data;
       return google.auth.fromJSON(credentials);
     } catch (err) {
       return null;
