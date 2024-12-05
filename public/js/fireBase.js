@@ -1,5 +1,8 @@
-/* #version=0.0.0-0#26 rm 2024-12-05T20:06:46 F3EB631AD936D9B8 */
-/* #version=0.0.0-0#25 rm 2024-12-05T19:51:56 63D3BDAD6C52698E */
+/* #version=0.0.0-0#28 rm 2024-12-05T20:44:19 1E9792983DC3B7DC */
+/* #version=0.0.0-0#27 rm 2024-12-05T20:43:39 7F9A3B6B5283050F */
+const process = require('process');
+const dotenv = require('dotenv');
+dotenv.config();
 // Import the functions you need from the SDKs you need
 // import { initializeApp } from "firebase/app";
 // import { getAnalytics } from "firebase/analytics";
@@ -21,15 +24,15 @@ module.exports = class FireBase {
         // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBeqPz-MwWlAE1YGB8IcoURfpdL5OHHwx8",
-            authDomain: "business-app-8ab80.firebaseapp.com",
+            apiKey: process.env.firebase_apiKey,
+            authDomain: process.env.firebase_authDomain,
             // databaseURL: 'https://console.firebase.google.com/u/2/project/business-app-8ab80/database/business-app-8ab80-default-rtdb/data/~2F',
-            databaseURL: 'https://business-app-8ab80-default-rtdb.firebaseio.com/',
-            projectId: "business-app-8ab80",
-            storageBucket: "business-app-8ab80.firebasestorage.app",
-            messagingSenderId: "553611640274",
-            appId: "1:553611640274:web:15accde607b2711136dc0b",
-            measurementId: "G-QX74ZLG6RR"
+            databaseURL: process.env.firebase_databaseURL,
+            projectId: process.env.firebase_projectId,
+            storageBucket: process.env.firebase_storageBucket,
+            messagingSenderId: process.env.firebase_messagingSenderId,
+            appId: process.env.firebase_appId,
+            measurementId: process.env.firebase_measurementId
         };
 
         // Initialize Firebase
