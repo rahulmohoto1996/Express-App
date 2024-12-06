@@ -1,5 +1,5 @@
-/* #version=0.0.0-0#106 rm 2024-12-05T20:31:30 597C80EE6888E041 */
-/* #version=0.0.0-0#105 rm 2024-12-05T20:28:38 7304F0BAE7D0E9D */
+/* #version=0.0.0-0#112 rm 2024-12-06T16:10:48 F776CAADD5DDE732 */
+/* #version=0.0.0-0#111 rm 2024-12-06T16:10:14 9660A1CD7CCF48BF */
 const googleAuth = require("./public/js/googleDriveAuthentication.js");
 const googleUtility = require("./public/js/googleDriveUtilityFunctions.js");
 const xhrCore = require("./public/js/xhrCore.js"); // import xhrCore from "./public/js/xhrCore.js";
@@ -45,6 +45,56 @@ app.get('/events/:id', (req, res) => {
     const event = events.find(event => event.id === id);
     res.send(event);
 });
+
+app.get('/register/userMail/:userMail/password/:password', async (req, res) => {
+  debugger;
+  var result = {ok: true, status: 'Ok'}
+  var userMail = req.params.userMail;
+  var password = req.params.password;
+  if(!userMail || !password) {
+    result.ok = false;
+    result.status = 'invalid usermail or password prvided.'
+    res.send(result)
+  }
+  var userId = Math.random().toString(36).slice(2); //generates alpha-numeric string
+  var user = {mail: userMail, password: password};
+  var payload = {
+    node: 'user', 
+    child: userId, 
+    key: 'info',
+    data: user
+  };
+  var response = await fireBaseApp.postData(payload);
+  if(!response || !response.ok) {
+    result.ok = false;
+    result.status = response.status;
+  }
+  result.userId = userId;
+  res.send(result);
+})
+
+app.get('/login/userId/:userId/password/:password', async (req, res) => {
+  debugger;
+  var result = {ok: true, status: 'Ok'}
+  var userId = req.params.userId;
+  var password = req.params.password;
+  if(!userId || !password) {
+    result.ok = false;
+    result.status = 'invalid userId or, password prvided.'
+    res.send(result)
+  }
+  var payload = {
+    node: 'user', 
+    child: userId
+  };
+  var response = await fireBaseApp.getData(payload);
+  if(!response || !response.ok) {
+    result.ok = false;
+    result.status = response.status;
+  }
+  result.data = response.data.info;
+  res.send(result);
+})
 
 app.get('/listFilesUnderFolder/:folderId/pageSize/:pageSize', async (req, res) => {
   debugger;
@@ -177,6 +227,7 @@ app.get('/oauth2callback', async (req, res) => {
     var payload = {
       node: 'credential', 
       child: 'test', 
+      key: 'tokens',
       data: tokens
     };
     var response = await fireBaseApp.postData(payload)

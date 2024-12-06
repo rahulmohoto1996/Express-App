@@ -1,5 +1,5 @@
+/* #version=0.0.0-0#29 rm 2024-12-06T16:09:38 F659EC91655C190A */
 /* #version=0.0.0-0#28 rm 2024-12-05T20:44:19 1E9792983DC3B7DC */
-/* #version=0.0.0-0#27 rm 2024-12-05T20:43:39 7F9A3B6B5283050F */
 const process = require('process');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -52,15 +52,16 @@ module.exports = class FireBase {
     }
 
     //Post data to Firebase
-    async postData(options = {node: null, child: null, data: null}) {
+    async postData(options = {node: null, child: null, key: null, data: null}) {
         debugger;
         var timestamp = Date.now();
         var db = this.db;
+        var obj = {
+            timestamp: timestamp
+        }
+        obj[options.key] = options.data;
         try {
-            await set(ref(db, `${options.node}/${options.child}`), {
-                data: options.data,
-                timestamp: timestamp
-            });
+            await set(ref(db, `${options.node}/${options.child}`), obj);
         } catch (error) {
             return { ok: false, status: `Unable to write to firebase. ${error}` }
         }

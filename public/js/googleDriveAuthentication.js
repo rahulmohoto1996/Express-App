@@ -1,5 +1,5 @@
+/* #version=0.0.0-0#49 rm 2024-12-06T15:56:52 288F6D07F6C91486 */
 /* #version=0.0.0-0#48 rm 2024-12-05T20:25:02 A240DEB9765EDEC0 */
-/* #version=0.0.0-0#47 rm 2024-12-05T20:21:50 209FD6B28338C901 */
 //KB: https://developers.google.com/drive/api/quickstart/nodejs
 //KB: https://developers.google.com/identity/protocols/oauth2/web-server
 var FireBase = require('./fireBase.js');
@@ -45,7 +45,7 @@ async loadSavedCredentialsIfExist() {
       var content = await fireBaseApp.getData(payload);
       content = content.data;
       // const credentials = JSON.parse(content);
-      var credentials = content.data;
+      var credentials = content.tokens;
       return google.auth.fromJSON(credentials);
     } catch (err) {
       return null;
