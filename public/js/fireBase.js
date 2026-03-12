@@ -68,6 +68,23 @@ module.exports = class FireBase {
         return { ok: true, status: 'Ok' }
     }
 
+    //postData test
+    async postData_test() {
+        debugger;
+        var payload = {
+            node: 'data', 
+            child: '1', 
+            data: 'Hello World',
+            key: 'x'
+        };
+        // var message = 'Hello world';
+        var result = await this.postData(payload);
+        debugger;
+        // var status = result;
+        // res.status(200).send(status);
+        return result;
+    }
+
     //Receive data from Firebase
     async getData(options={node: null, child: null}) {
         debugger;
@@ -88,6 +105,19 @@ module.exports = class FireBase {
             result.ok = false;
             result.status = `Unable to read data from firebase. ${error}`
         });
+        return result;
+    }
+
+    //Getting item from firebase app
+    async getData_test() {
+        debugger;
+        var payload = {
+            node: 'data',
+            child: '1'
+        }
+        var result = await this.getData(payload);
+        // res.status(200).send(result);
+        debugger;
         return result;
     }
 
