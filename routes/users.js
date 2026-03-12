@@ -6,7 +6,7 @@ const fireBaseApp = new FireBase();
 
 router.get('/register/userMail/:userMail/password/:password', async (req, res) => {
   debugger;
-  var result = {ok: true, status: 'Ok'}
+  var result = {ok: true, status: 'ok'}
   var userMail = req.params.userMail;
   var password = req.params.password;
   if(!userMail || !password) {
@@ -33,7 +33,7 @@ router.get('/register/userMail/:userMail/password/:password', async (req, res) =
 
 router.get('/login/userId/:userId/password/:password', async (req, res) => {
   debugger;
-  var result = {ok: true, status: 'Ok'}
+  var result = {ok: true, status: 'ok'}
   var userId = req.params.userId;
   var password = req.params.password;
   if(!userId || !password) {

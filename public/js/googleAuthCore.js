@@ -1,0 +1,197 @@
+/* #version=0.0.0-0#49 rm 2024-12-06T15:56:52 288F6D07F6C91486 */
+/* #version=0.0.0-0#48 rm 2024-12-05T20:25:02 A240DEB9765EDEC0 */
+//KB: https://developers.google.com/drive/api/quickstart/nodejs
+//KB: https://developers.google.com/identity/protocols/oauth2/web-server
+var FireBase = require('./fireBase.js');
+var fireBaseApp = new FireBase();
+
+const crypto = require('crypto');
+const fs = require('fs').promises;
+const path = require('path');
+const process = require('process');
+const { authenticate } = require('@google-cloud/local-auth');
+const { google } = require('googleapis');
+const dotenv = require('dotenv');
+dotenv.config();
+
+// If modifying these scopes, delete token.json.
+const SCOPES = [
+  'https://www.googleapis.com/auth/drive.metadata.readonly',
+  'https://www.googleapis.com/auth/drive.readonly'
+
+];
+// The file token.json stores the user's access and refresh tokens, and is
+// created automatically when the authorization flow completes for the first
+// time.
+const TOKEN_PATH = path.join(process.cwd(), 'token.json');
+const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
+// const VIRTUAL_CREDENTIALS_PATH = path.join(process.cwd(), 'virtualCredentials.json');
+
+module.exports = {
+
+  /**
+* Reads previously authorized credentials from the save file.
+*
+* @return {Promise<OAuth2Client|null>}
+*/
+  async loadSavedCredentialsIfExist() {
+    debugger;
+
+    let res = { ok: true };
+
+    try {
+      // const content = await fs.readFile(TOKEN_PATH);
+      var payload = {
+        node: 'credential',
+        child: 'test'
+      }
+      var content = await fireBaseApp.getData(payload);
+      content = content.data;
+      // const credentials = JSON.parse(content);
+      var credentials = content.tokens;
+      // credentials = google.auth.fromJSON(credentials);
+
+      let response = await this.generateOauth2Client(credentials);
+      if(!response || !response.ok) {
+        return response;
+      }
+
+      const oauth2Client = response.oauth2Client;
+
+      res = { ...res, status: "ok", oauth2Client };
+
+    } catch (err) {
+      res.ok = false;
+      res.status = err;
+    }
+
+    return res;
+
+  },
+
+  async generateOauth2Client(credentials) {
+    let res = {ok: true};
+
+    try {
+      var content = await fs.readFile(CREDENTIALS_PATH);
+      var keys = JSON.parse(content);
+      var redirect_uris = keys.web.redirect_uris;
+      var REDIRECT_URI = process.env.NODE_ENV === 'production' ? redirect_uris.find((n) => n.env == "prod") : redirect_uris.find((n) => n.env == "dev");
+      REDIRECT_URI = REDIRECT_URI.uri;
+
+      const oauth2Client = new google.auth.OAuth2(
+        process.env.CLIENT_ID, // Your Google OAuth Client ID
+        process.env.CLIENT_SECRET, // Your Google OAuth Client Secret
+        REDIRECT_URI // Redirect URI for server
+      );
+
+      if(credentials)
+        oauth2Client.setCredentials(credentials);
+
+      res = {...res, oauth2Client};
+    } catch(error) {
+      res.ok = false;
+      res.status = error;
+    }
+
+    return res;
+  },
+
+  /**
+   * Serializes credentials to a file compatible with GoogleAuth.fromJSON.
+   *
+   * @param {OAuth2Client} client
+   * @return {Promise<void>}
+   */
+  // async saveCredentials(tokens) {
+  //   debugger;
+  //   if(!tokens) return {
+  //     ok: false,
+  //     status: 'Tokens not available.'
+  //   }
+  //   const payload = JSON.stringify({
+  //     type: 'authorized_user',
+  //     client_id: process.env.CLIENT_ID,
+  //     client_secret: process.env.CLIENT_SECRET,
+  //     refresh_token: tokens.refresh_token,
+  //     access_token: tokens.access_token
+  //   });
+  //   await fs.writeFile(TOKEN_PATH, payload);
+  //   console.log('Token Wrote Successfully.');
+  //   return {ok: true, status: 'Ok'}
+  // },
+
+  /**
+   * Load or request or authorization to call APIs.
+   *
+   */
+  async authorize() {
+    debugger;
+    let client = await this.loadSavedCredentialsIfExist();
+    if (client && client.ok) {
+      return { client: client, ok: true, status: 'Client is authorized already.' };
+    }
+
+    // var content = await fs.readFile(CREDENTIALS_PATH);
+    // var keys = JSON.parse(content);
+    // var redirect_uris = keys.web.redirect_uris;
+    // var REDIRECT_URI = process.env.NODE_ENV === 'production' ? redirect_uris.find((n) => n.env == "prod") : redirect_uris.find((n) => n.env == "dev");
+    // REDIRECT_URI = REDIRECT_URI.uri;
+
+    try {
+      // const oauth2Client = new google.auth.OAuth2(
+      //   process.env.CLIENT_ID, // Your Google OAuth Client ID
+      //   process.env.CLIENT_SECRET, // Your Google OAuth Client Secret
+      //   REDIRECT_URI // Redirect URI for server
+      // );
+      let response = await this.generateOauth2Client();
+      if(!response || !response.ok) {
+        return response;
+      }
+      const oauth2Client = response.oauth2Client;
+
+      const state = crypto.randomBytes(32).toString('hex');
+
+      const authUrl = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: SCOPES, // Add necessary scopes
+        include_granted_scopes: true,
+        state: state
+      });
+
+      return {
+        authUrl, oauth2Client, state,
+        ok: true, status: 'Authorization URL generated.'
+      };
+
+    } catch (error) {
+      return { ok: false, status: `Authorization Failed. Error: ${error}` }
+    }
+  },
+
+  //Creating a virtual credential file. 
+  //Not used anymore.
+  // async createVirtualCredentials() {
+  //   var content = await fs.readFile(CREDENTIALS_PATH);
+  //   var keys = JSON.parse(content);
+  //   var client_secret = process.env.client_secret;
+  //   var client_id = process.env.client_id;
+  //   keys.web.client_secret = client_secret;
+  //   keys.web.client_id = client_id;
+  //   var redirect_uris = keys.web.redirect_uris;
+  //   var REDIRECT_URI = process.env.NODE_ENV === 'production' ? redirect_uris.find((n) => n.env == "prod") : redirect_uris.find((n) => n.env == "dev");
+  //   keys.web.redirect_uris = [REDIRECT_URI.uri];
+  //   console.log(`${JSON.stringify(keys, null, 4)}`);
+  //   await fs.writeFile(VIRTUAL_CREDENTIALS_PATH, JSON.stringify(keys));
+  // },
+
+  //deleting a file
+  //Not used
+  // deleteFile(path) {
+  //   fs.unlink(path, (err) => {
+  //     if (err) 
+  //       throw err;
+  //   });
+  //   return {ok: true}
+  // }
+}

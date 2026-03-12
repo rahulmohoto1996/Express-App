@@ -1,26 +1,28 @@
 const express = require('express');
 const router = express.Router(); // Create a new router instance
 
-const googleAuth = require("../public/js/googleDriveAuthentication.js");
-const googleUtility = require("../public/js/googleDriveUtilityFunctions.js");
+const googleAuth = require("../public/js/googleAuthCore.js");
+const googleUtility = require("../public/js/googleDriveCore.js");
 
 router.get('/listFilesUnderFolder/:folderId/pageSize/:pageSize', async (req, res) => {
   debugger;
   var result = {ok: true};
   var folderId = req.params.folderId; //'1ZbV78lR5wQntzf1zgfQ5NlzTsgf2ThSg'; //This is boroghor folder ID
   var pageSize = req.params.pageSize;
-  var auth = await googleAuth.loadSavedCredentialsIfExist(); //await googleAuth.authorize();
-  if (!auth) {
-    result.ok = false;
-    result.status = 'Authorization required.';
-    res.send(result);
+  var response = await googleAuth.loadSavedCredentialsIfExist(); //await googleAuth.authorize();
+  if (!response || !response.ok) {
+    // result.ok = false;
+    // result.status = 'Authorization required.';
+    res.send(response);
     return;
   }
-  var response = await googleUtility.listFilesUnderFolderId(auth, folderId, pageSize);
+  let auth = auth.oauth2Client;
+  
+  response = await googleUtility.listFilesUnderFolderId(auth, folderId, pageSize);
   if(!response || !response.ok){
-    result.ok = false;
-    result.status = response.status;
-    res.send(result);
+    // result.ok = false;
+    // result.status = response.status;
+    res.send(response);
     return;
   }
   var files = response.files;
@@ -30,7 +32,7 @@ router.get('/listFilesUnderFolder/:folderId/pageSize/:pageSize', async (req, res
     res.send(result);
     return;
   }
-  result.status = 'Ok';
+  result.status = 'ok';
   result.files = files;
   res.send(result);
 })
@@ -45,21 +47,23 @@ router.get('/readFromFileById/:fileId', async (req, res) => {
     res.send(result);
     return;
   }
-  var auth = await googleAuth.loadSavedCredentialsIfExist(); //await googleAuth.authorize();
-  if (!auth) {
-    result.ok = false;
-    result.status = 'Authorization required.';
-    res.send(result);
+  var response = await googleAuth.loadSavedCredentialsIfExist(); //await googleAuth.authorize();
+  if (!response || !response.ok) {
+    // result.ok = false;
+    // result.status = 'Authorization required.';
+    res.send(response);
     return;
   }
-  var response = await googleUtility.readExcelFromDrive(auth, fileId);
+
+  let auth = response.oauth2Client;
+  response = await googleUtility.readExcelFromDrive(auth, fileId);
   if(!response || !response.ok){
-    result.ok = false;
-    result.status = response.status;
-    res.send(result);
+    // result.ok = false;
+    // result.status = response.status;
+    res.send(response);
     return;
   }
-  result.status = 'Ok';
+  result.status = 'ok';
   result.parsedData = response.parsedData;
   res.send(result);
 })
@@ -74,21 +78,23 @@ router.get('/searchFolderFromDrive/:folderName', async (req, res) => {
     res.send(result);
     return;
   }
-  var auth = await googleAuth.loadSavedCredentialsIfExist(); //await googleAuth.authorize();
-  if (!auth) {
-    result.ok = false;
-    result.status = 'Authorization required.';
-    res.send(result);
+  var response = await googleAuth.loadSavedCredentialsIfExist(); //await googleAuth.authorize();
+  if (!response || !response.ok) {
+    // result.ok = false;
+    // result.status = 'Authorization required.';
+    res.send(response);
     return;
   }
-  var response = await googleUtility.searchFolderByName(auth, folderName);
+  let auth = response.oauth2Client;
+
+  response = await googleUtility.searchFolderByName(auth, folderName);
   if(!response || !response.ok){
-    result.ok = false;
-    result.status = response.status;
-    res.send(result);
+    // result.ok = false;
+    // result.status = response.status;
+    res.send(response);
     return;
   }
-  result.status = 'Ok';
+  result.status = 'ok';
   result.folders = response.folders;
   res.send(result);
 })

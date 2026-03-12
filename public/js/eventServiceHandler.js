@@ -1,8 +1,8 @@
 /* #version=0.0.0-0#17 rm 2024-11-26T18:44:20 1E7241F37577ED50 */
 /* #version=0.0.0-0#16 rm 2024-11-26T18:44:08 AAD00E1FA4B3A6E6 */
 var XLSX = require("xlsx"); //Adding XLSX read from sheetJS library.
-const googleAuth = require("./googleDriveAuthentication.js");
-const googleUtility = require("./googleDriveUtilityFunctions.js");
+const googleAuth = require("./googleAuthCore.js");
+const googleUtility = require("./googleDriveCore.js");
 
 module.exports = {
 

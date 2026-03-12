@@ -3,7 +3,7 @@ const router = express.Router(); // Create a new router instance
 
 var oauth2Client = null;
 
-const googleAuth = require("../public/js/googleDriveAuthentication.js");
+const googleAuth = require("../public/js/googleAuthCore.js");
 
 const FireBase = require('../public/js/fireBase.js');
 const fireBaseApp = new FireBase();

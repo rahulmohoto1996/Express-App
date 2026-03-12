@@ -37,7 +37,7 @@ module.exports = {
    */
   async listFilesUnderFolderId(authClient, folderId, pageSize) {
     debugger;
-    var result = { ok: true, status: 'Ok' };
+    var result = { ok: true, status: 'ok' };
     var files = null;
     try {
       const drive = google.drive({ version: 'v3', auth: authClient });
@@ -101,7 +101,7 @@ module.exports = {
    */
   async searchFolderByName(authClient, folderName) {
     debugger;
-    var result = {ok: true, status: 'Ok'}
+    var result = {ok: true, status: 'ok'}
     try {
       const drive = google.drive({ version: 'v3', auth: authClient });
       const res = await drive.files.list({
