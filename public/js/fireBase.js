@@ -7,7 +7,7 @@ dotenv.config();
 // import { initializeApp } from "firebase/app";
 // import { getAnalytics } from "firebase/analytics";
 var { initializeApp } = require('firebase/app');
-var { getDatabase, ref, set, child, get } = require('firebase/database');
+var { getDatabase, ref, set, child, get, query, orderByChild, equalTo } = require('firebase/database');
 // getAnalytics = require('firebase/analytics');
 
 module.exports = class FireBase {
@@ -119,6 +119,50 @@ module.exports = class FireBase {
         // res.status(200).send(result);
         debugger;
         return result;
+    }
+
+    async queryDB(nodeName, path, searchedParam) {
+        let result = {ok: true, status: 'ok'};
+
+        let db = this.db;
+
+        const usersRef = ref(db, nodeName); //"user"
+
+        const q = query(
+            usersRef,
+            orderByChild(path),   // path to the nested field //"info/mail"
+            equalTo(searchedParam)
+        );
+
+        let data = null;
+
+        try {
+            const snapshot = await get(q);
+
+            if (snapshot.exists()) {
+                const node = Object.keys(snapshot.val())[0]; // "gaygtx0rsdd"
+                const child = snapshot.val()[node];
+                data = {node, child};
+                // return data;
+            }   
+        } catch (error) {
+            result.ok = false;
+            result.status = `Unable to read data from firebase. ${error}`;
+        }
+
+        result.data = data;
+
+        return result;
+    }
+
+    async queryDB_test() {
+        let nodeName = "user";
+        let path = "info/mail";
+        let searchedParam = "rahulmohoto@gmail.com";
+
+        let res = await this.queryDB(nodeName, path, searchedParam);
+        debugger;
+
     }
 
 }
